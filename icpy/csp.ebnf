@@ -7,8 +7,17 @@ start
 
 
 variables
-    = id:ident 'in' '[' inf:signed_float ',' sup:signed_float ']' ';' rest:variables
+    = id:ident 'in' '[' inf:signed_number ',' sup:signed_number ']' ';' rest:variables
     | ()
+    ;
+
+signed_number
+    = value:float
+    | value:integer
+    | value:infinity
+    | minus:'-' value:float
+    | minus:'-' value:integer
+    | minus:'-' value:infinity
     ;
 
 
@@ -85,13 +94,8 @@ integer
     = /\d+/
     ;
 
-signed_float
-    = value:float
-    | minus:'-' value:float
-    ;
-
 float
-    = /((\d*\.\d+)|(\d+\.?))([eE][+-]?\d+)?/
+    = /(((\d*\.\d+)|(\d+\.?))[eE][+-]?\d+|((\d*\.\d+)|(\d+\.)))/
     ;
 
 infinity

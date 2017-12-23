@@ -99,10 +99,10 @@ class CspParser(Parser):
                 self.name_last_node('id')
                 self._token('in')
                 self._token('[')
-                self._signed_float_()
+                self._signed_number_()
                 self.name_last_node('inf')
                 self._token(',')
-                self._signed_float_()
+                self._signed_number_()
                 self.name_last_node('sup')
                 self._token(']')
                 self._token(';')
@@ -113,6 +113,39 @@ class CspParser(Parser):
             self._error('no available options')
         self.ast._define(
             ['id', 'inf', 'rest', 'sup'],
+            []
+        )
+
+    @graken()
+    def _signed_number_(self):
+        with self._choice():
+            with self._option():
+                self._float_()
+                self.name_last_node('value')
+            with self._option():
+                self._integer_()
+                self.name_last_node('value')
+            with self._option():
+                self._infinity_()
+                self.name_last_node('value')
+            with self._option():
+                self._token('-')
+                self.name_last_node('minus')
+                self._float_()
+                self.name_last_node('value')
+            with self._option():
+                self._token('-')
+                self.name_last_node('minus')
+                self._integer_()
+                self.name_last_node('value')
+            with self._option():
+                self._token('-')
+                self.name_last_node('minus')
+                self._infinity_()
+                self.name_last_node('value')
+            self._error('no available options')
+        self.ast._define(
+            ['minus', 'value'],
             []
         )
 
@@ -331,25 +364,8 @@ class CspParser(Parser):
         self._pattern(r'\d+')
 
     @graken()
-    def _signed_float_(self):
-        with self._choice():
-            with self._option():
-                self._float_()
-                self.name_last_node('value')
-            with self._option():
-                self._token('-')
-                self.name_last_node('minus')
-                self._float_()
-                self.name_last_node('value')
-            self._error('no available options')
-        self.ast._define(
-            ['minus', 'value'],
-            []
-        )
-
-    @graken()
     def _float_(self):
-        self._pattern(r'((\d*\.\d+)|(\d+\.?))([eE][+-]?\d+)?')
+        self._pattern(r'(((\d*\.\d+)|(\d+\.?))[eE][+-]?\d+|((\d*\.\d+)|(\d+\.)))')
 
     @graken()
     def _infinity_(self):
@@ -379,6 +395,9 @@ class CspSemantics(object):
         return ast
 
     def variables(self, ast):
+        return ast
+
+    def signed_number(self, ast):
         return ast
 
     def constraints(self, ast):
@@ -415,9 +434,6 @@ class CspSemantics(object):
         return ast
 
     def integer(self, ast):
-        return ast
-
-    def signed_float(self, ast):
         return ast
 
     def float(self, ast):

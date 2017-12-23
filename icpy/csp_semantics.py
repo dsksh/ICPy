@@ -33,7 +33,7 @@ class CspSemantics(object):
             ast.rest[ast.id[1]] = ('V', ast.id[1], interval[ast.inf, ast.sup])
             return ast.rest
 
-    def signed_float(self, ast):
+    def signed_number(self, ast):
         v = ast.value[0][ast.value[1]][1]
         if ast.minus is None:
             return v
