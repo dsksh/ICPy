@@ -1,0 +1,107 @@
+@@grammar::Csp
+
+
+start
+    = 'Variables' vs:variables 'Constraints' cs:constraints 'end' $
+    ;
+
+
+variables
+    = id:ident 'in' '[' inf:signed_float ',' sup:signed_float ']' ';' rest:variables
+    | ()
+    ;
+
+
+constraints
+    = head:inequality ';' rest:constraints
+    | ()
+    ;
+
+inequality
+    = left:expression op:'==' right:expression
+    | left:expression op:'<'  right:expression
+    | left:expression op:'<=' right:expression
+    | left:expression op:'>'  right:expression
+    | left:expression op:'>=' right:expression
+    ;
+
+
+expression
+    = head:term rest:expr_rest
+    ;
+
+expr_rest
+    = op:'+' ~ arg:term rest:expr_rest
+    | op:'-' ~ arg:term rest:expr_rest
+    | ()
+    ;
+
+
+term
+    = head:min_expr rest:term_rest
+    ;
+
+term_rest
+    = op:'*' ~ arg:min_expr rest:term_rest
+    | op:'/' ~ arg:min_expr rest:term_rest
+    | ()
+    ;
+
+
+min_expr
+    = op:'-' ~ arg:min_expr
+    | @:pow_expr
+    ;
+
+
+pow_expr
+    = base:factor rest:pow_expr_rest
+    ;
+
+pow_expr_rest
+    = 
+#      op:'^' ~ arg:factor rest:pow_expr_rest
+      op:'^' ~ arg:integer rest:pow_expr_rest
+    | ()
+    ;
+
+
+factor
+    = subexpression
+    | float
+    | integer
+    | infinity
+    | interval
+    | ident
+    ;
+
+
+subexpression
+    = '(' ~ @:expression ')'
+    ;
+
+
+integer
+    = /\d+/
+    ;
+
+signed_float
+    = value:float
+    | minus:'-' value:float
+    ;
+
+float
+    = /((\d*\.\d+)|(\d+\.?))([eE][+-]?\d+)?/
+    ;
+
+infinity
+    = 'inf'
+    ;
+
+interval
+    = '[' inf:expression ',' sup:expression ']'
+    ;
+
+ident
+    = /[a-zA-Z][a-zA-Z0-9]*/
+    ;
