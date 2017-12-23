@@ -1,3 +1,3 @@
 # ICPy
 
-Interval Constraint Programming tools implemented with Python.
+Interval Constraint Programming tool implemented with Python.

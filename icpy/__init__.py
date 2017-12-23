@@ -2,8 +2,8 @@ from __future__ import print_function
 import sys
 from copy import deepcopy
 from interval import interval, inf, imath
-from csp_parser import CspParser
-from csp_semantics import CspSemantics
+from .csp_parser import CspParser
+from .csp_semantics import CspSemantics
 
 def root(x, n):
     if len(x) == 0:
@@ -170,7 +170,8 @@ def parse_and_solve(csp):
     return box
 
 
-if __name__ == '__main__':
+def main():
+#if __name__ == '__main__':
     csp = open(sys.argv[1]).read()
     print(csp.strip())
     print()
@@ -179,4 +180,3 @@ if __name__ == '__main__':
     print(result)
     #print(result[1])
     #print(result[2])
-

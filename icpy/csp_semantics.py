@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import sys
-from csp_parser import CspParser
+from .csp_parser import CspParser
 import json
 from grako.util import asjson
 from interval import interval, imath
