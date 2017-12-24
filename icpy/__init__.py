@@ -8,16 +8,10 @@ from .contractor import Hc4revise
 
 def parse_and_solve(csp):
     parser = CspParser(semantics = CspSemantics())
-    vs, (cd, cs) = parser.parse(csp)
-
-    # set variable nodes
-    for v in vs.keys():
-        cd[v] = vs[v]
+    vs, box0, (cd, cs) = parser.parse(csp)
 
     # prepare an initial box
-    box = {}
-    for v in vs.keys():
-        box[v] = vs[v][2]
+    box = deepcopy(box0)
 
     contractor = Hc4revise(cd, cs)
     contractor.contract(box)

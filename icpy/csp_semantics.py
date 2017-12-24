@@ -6,6 +6,7 @@ from .csp_parser import CspParser
 import json
 from grako.util import asjson
 from interval import interval, imath
+from .box import IntervalList, IntervalDict
 
 def merge(ds):
     return {k: v for d in ds for k,v in d.items()}
@@ -23,15 +24,16 @@ def calc_rest(value, ast):
 
 class CspSemantics(object):
 
+    def __init__(self):
+        self.vs = {}
+
     def start(self, ast):
-        return ast.vs, ast.cs
+        return self.vs.keys(), IntervalDict(self.vs), ast.cs
 
     def variables(self, ast):
-        if ast.id is None:
-            return {}
-        else:
-            ast.rest[ast.id[1]] = ('V', ast.id[1], interval[ast.inf, ast.sup])
-            return ast.rest
+        if not ast.id is None:
+            self.vs[ast.id[1]] = interval[ast.inf, ast.sup]
+            #return ast.rest
 
     def signed_number(self, ast):
         v = ast.value[0][ast.value[1]][1]
@@ -112,7 +114,7 @@ class CspSemantics(object):
         return {k: n}, k
 
     def ident(self, ast):
-        n = 'R', ast
         k = ast
+        n = 'V', k
         return {k: n}, k
 

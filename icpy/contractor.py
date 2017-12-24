@@ -1,29 +1,7 @@
 from __future__ import print_function
 import sys
 from interval import interval, inf, imath
-
-def root(x, n):
-    if len(x) == 0:
-        return x
-    if x[0].inf == 0 and x[0].sup == 0:
-        return interval[0]
-    if n == 0:
-        return interval[1]
-    if n < 0:
-        return 1.0/root(x, -n)
-    if n==1:
-        return x;
-
-    # TODO: interval pow function
-    #if n%2 == 0:
-    #    return pow(x, interval[1]/n)
-    #else:
-    #    return pow(x, interval[1]/n) | (-pow(-x, interval[1]/n))
-
-    # FIXME
-    return x
-
-###
+from .interval_utils import root
 
 class Contractor:
 
@@ -137,14 +115,11 @@ class Hc4revise(Contractor):
             i = self.dag[n[2]][1]
     
             if i % 2 == 0:
-                # TODO
-                #p = fwd[n[1]].newton(lambda x: x**i, lambda x: i*x**(i-1))
                 p = root(bwd[n_id], i)
                 pp = p & fwd[n[1]]
                 np = (-p) & fwd[n[1]]
                 bwd[n[1]] = interval.hull([pp, np])
             else:
-                #bwd[n[1]] = fwd[n[1]].newton(lambda x: x**i, lambda x: i* x**(i-1))
                 bwd[n[1]] = root(bwd[n_id], i)
     
             rec(n[1], box)
@@ -152,8 +127,7 @@ class Hc4revise(Contractor):
         elif n[0] == 'C':
             bwd[n_id] &= n[1]
         elif n[0] == 'V':
-            bwd[n_id] &= n[2]
-            box[n[1]] = bwd[n_id]
+            box[n[1]] &= bwd[n_id]
     
         else:
             print('unsupported node: '+str(n))
@@ -165,12 +139,12 @@ class Hc4revise(Contractor):
             n = self.dag[c]
             self.__fwd_eval(n[1], box)
             self.__fwd_eval(n[2], box)
-            #print('fwd:')
-            #print(fwd)
-            #print()
+            print('fwd:')
+            print(self.__fwd)
+            print()
             
             self.__bwd_propag(c, box)
-            #print('bwd:')
-            #print(bwd)
-            #print()
+            print('bwd:')
+            print(self.__bwd)
+            print()
 
