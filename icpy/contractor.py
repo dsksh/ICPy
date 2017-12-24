@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 import sys
 from interval import interval, inf, imath
@@ -64,30 +66,30 @@ class Hc4revise(Contractor):
         bwd = self.__bwd
         rec = self.__bwd_propag
 
-        if n[0] == '==':
-            v = fwd[n[1]] & fwd[n[2]]
-            bwd[n[1]] = v
-            rec(n[1], box)
-            bwd[n[2]] = v
-            rec(n[2], box)
+#        if n[0] == '==':
+#            v = fwd[n[1]] & fwd[n[2]]
+#            bwd[n[1]] = v
+#            rec(n[1], box)
+#            bwd[n[2]] = v
+#            rec(n[2], box)
+#    
+#        elif n[0] == '>' or n[0] == '>=':
+#            v = interval.hull([interval[-inf], fwd[n[1]]]) 
+#            v &= interval.hull([fwd[n[2]], interval[inf]])
+#            bwd[n[1]] = fwd[n[1]] & v
+#            rec(n[1], box)
+#            bwd[n[2]] = fwd[n[2]] & v
+#            rec(n[2], box)
+#    
+#        elif n[0] == '<' or n[0] == '<=':
+#            v = interval.hull([fwd[n[1]], interval[inf]]) 
+#            v &= interval.hull([interval[-inf], fwd[n[2]]])
+#            bwd[n[1]] = fwd[n[1]] & v
+#            rec(n[1], box)
+#            bwd[n[2]] = fwd[n[1]] & v
+#            rec(n[2], box)
     
-        elif n[0] == '>' or n[0] == '>=':
-            v = interval.hull([interval[-inf], fwd[n[1]]]) 
-            v &= interval.hull([fwd[n[2]], interval[inf]])
-            bwd[n[1]] = fwd[n[1]] & v
-            rec(n[1], box)
-            bwd[n[2]] = fwd[n[2]] & v
-            rec(n[2], box)
-    
-        elif n[0] == '<' or n[0] == '<=':
-            v = interval.hull([fwd[n[1]], interval[inf]]) 
-            v &= interval.hull([interval[-inf], fwd[n[2]]])
-            bwd[n[1]] = fwd[n[1]] & v
-            rec(n[1], box)
-            bwd[n[2]] = fwd[n[1]] & v
-            rec(n[2], box)
-    
-        elif n[0] == '+':
+        if n[0] == '+':
             bwd[n[1]] = bwd[n_id] - fwd[n[2]]
             rec(n[1], box)
             bwd[n[2]] = bwd[n_id] - fwd[n[1]]
@@ -135,16 +137,47 @@ class Hc4revise(Contractor):
 
 
     def contract(self, box):
-        for c in self.c_ids:
-            n = self.dag[c]
-            self.__fwd_eval(n[1], box)
-            self.__fwd_eval(n[2], box)
-            print('fwd:')
-            print(self.__fwd)
-            print()
+        for op,l,r in self.c_ids:
+            l = l[0]
+            r = r[0]
+
+            # forward propagation
+            self.__fwd_eval(l, box)
+            self.__fwd_eval(r, box)
+            #print('fwd:')
+            #print(self.__fwd)
+            #print()
+
+            # backward propagation
+            fwd = self.__fwd
+            bwd = self.__bwd
+
+            if op == '==':
+                v = fwd[l] & fwd[r]
+                bwd[l] = v
+                self.__bwd_propag(l, box)
+                bwd[r] = v
+                self.__bwd_propag(r, box)
+        
+            elif op == '>' or op == '>=':
+                v = interval.hull([interval[-inf], fwd[l]]) 
+                v &= interval.hull([fwd[r], interval[inf]])
+                bwd[l] = fwd[l] & v
+                self.__bwd_propag(l, box)
+                bwd[r] = fwd[r] & v
+                self.__bwd_propag(r, box)
+        
+            elif op == '<' or op == '<=':
+                v = interval.hull([fwd[l], interval[inf]]) 
+                v &= interval.hull([interval[-inf], fwd[r]])
+                bwd[l] = fwd[l] & v
+                self.__bwd_propag(l, box)
+                bwd[r] = fwd[l] & v
+                self.__bwd_propag(r, box)
             
-            self.__bwd_propag(c, box)
-            print('bwd:')
-            print(self.__bwd)
-            print()
+            #self.__bwd_propag(c, box)
+
+            #print('bwd:')
+            #print(self.__bwd)
+            #print()
 

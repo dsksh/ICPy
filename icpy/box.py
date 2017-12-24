@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 from copy import copy, deepcopy
 from interval import interval

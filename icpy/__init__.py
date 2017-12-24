@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 import sys
 from copy import deepcopy
@@ -8,12 +10,12 @@ from .contractor import Hc4revise
 
 def parse_and_solve(csp):
     parser = CspParser(semantics = CspSemantics())
-    vs, box0, (cd, cs) = parser.parse(csp)
+    vs, box0, (dag, cs) = parser.parse(csp)
 
     # prepare an initial box
     box = deepcopy(box0)
 
-    contractor = Hc4revise(cd, cs)
+    contractor = Hc4revise(dag, cs)
     contractor.contract(box)
 
     return box
@@ -27,5 +29,3 @@ def main():
 
     result = parse_and_solve(csp)
     print(result)
-    #print(result[1])
-    #print(result[2])
