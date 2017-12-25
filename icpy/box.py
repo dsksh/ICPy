@@ -4,6 +4,7 @@ import sys
 from copy import copy, deepcopy
 from interval import interval
 from functools import reduce
+from .interval_utils import is_empty
 
 class Box:
     """The interface for box implementations.
@@ -16,6 +17,9 @@ class Box:
         pass
 
     def __len__(self):
+        pass
+
+    def is_empty(self):
         pass
 
 
@@ -42,6 +46,12 @@ class IntervalDict(Box):
 
     def __str__(self):
         return "box"+str(self.__value)
+
+    def is_empty(self):
+        for i in self.__value.values():
+            if is_empty(i):
+                return True
+        return False
 
 
 class IntervalList(Box):
@@ -83,3 +93,8 @@ class IntervalList(Box):
         ss = map(lambda vn: "'"+vn+"': "+str(self[vn]), self.__scope)
         return 'box{'+reduce(lambda s1, s2: s1+', '+s2, ss)+'}'
 
+    def is_empty(self):
+        for i in self.__value:
+            if is_empty(i):
+                return True
+        return False

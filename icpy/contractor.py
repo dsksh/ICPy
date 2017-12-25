@@ -7,18 +7,18 @@ from .interval_utils import root
 
 class Contractor:
 
-    def __init__(self, dag, c_ids):
+    def __init__(self, dag, cs):
         self.dag = dag
-        self.c_ids = c_ids
+        self.cs = cs
 
-    def contract(box):
+    def contract(self, box):
         pass
 
 
 class Hc4revise(Contractor):
 
-    def __init__(self, dag, c_ids):
-        super().__init__(dag, c_ids)
+    def __init__(self, dag, cs):
+        super().__init__(dag, cs)
         self.__fwd = {}
         self.__bwd = {}
 
@@ -137,7 +137,7 @@ class Hc4revise(Contractor):
 
 
     def contract(self, box):
-        for op,l,r in self.c_ids:
+        for op,l,r in self.cs:
             l = l[0]
             r = r[0]
 
