@@ -64,13 +64,10 @@ class CspSemantics(object):
             return dag, [ast.head[1]] + ast.rest[1]
 
     def inequality(self, ast):
-        dl,kl,dkl = ast.left
-        dr,kr,dkr = ast.right
+        dl,n_id_l,d_ids_l = ast.left
+        dr,n_id_r,d_ids_r = ast.right
         dag = merge([dl,dr])
-        #k = kl+ast.op+kr
-        #if k not in d:
-        #    d[k] = ast.op, kl, kr
-        return dag, (ast.op, (kl,dkl), (kr,dkr))
+        return dag, (ast.op, (n_id_l,d_ids_l), (n_id_r,d_ids_r))
 
     def expression(self, ast):
         #print(json.dumps(asjson(ast.rest), indent=2))
@@ -80,28 +77,19 @@ class CspSemantics(object):
         return calc_rest(ast.head, ast.rest)
 
     def min_expr(self, ast):
-        if type(ast) == int:
-            assert(False)
-            return ast
-        elif type(ast) == float:
-            assert(False)
-            return ast
-        elif type(ast) == interval:
-            assert(False)
-            return ast
-        elif type(ast) == tuple:
+        if type(ast) == tuple:
             return ast
         elif ast.op == "-":
-            dag,k,dk = ast.arg
-            k_ = '('+str(0)+'-'+k+')'
-            if k_ not in dag.keys():
-                dag[k_] = '-', '0', k
+            dag,n_id,d_ids = ast.arg
+            n_id_ = '('+str(0)+'-'+n_id+')'
+            if n_id_ not in dag.keys():
+                dag[n_id_] = '-', '0', n_id
 
-            dk_ = tuple(map(
-                lambda i: append_diff_node(dag, '-', '0', '0', k, dk[i]), 
-                range(len(dk)) ))
+            d_ids_ = tuple(map(
+                lambda i: append_diff_node(dag, '-', '0', '0', n_id, d_ids[i]), 
+                range(len(d_ids)) ))
 
-            return dag, k_, dk_
+            return dag, n_id_, d_ids_
 
     def pow_expr(self, ast):
         return calc_rest(ast.base, ast.rest)
@@ -110,33 +98,33 @@ class CspSemantics(object):
     def integer(self, ast):
         v = int(ast)
         n = 'C', v
-        k = str(v)
-        dk = tuple(map(lambda _: '0', self.vs))
-        return {k: n}, k, dk
+        n_id = str(v)
+        d_ids = tuple(map(lambda _: '0', self.vs))
+        return {n_id: n}, n_id, d_ids
 
     def float(self, ast):
         v = float(ast)
         n = 'C', v
-        k = str(v)
-        dk = tuple(map(lambda _: '0', self.vs))
-        return {k: n}, k, dk
+        n_id = str(v)
+        d_ids = tuple(map(lambda _: '0', self.vs))
+        return {n_id: n}, n_id, d_ids
 
     def infinity(self, ast):
         v = float('inf')
         n = 'C', v
-        k = str(v)
-        dk = tuple(map(lambda _: '0', self.vs))
-        return {k: n}, k, dk
+        n_id = str(v)
+        d_ids = tuple(map(lambda _: '0', self.vs))
+        return {n_id: n}, n_id, d_ids
 
     def interval(self, ast):
         n = 'I', ast.inf, ast.sup
-        k = str(v)
-        dk = tuple(map(lambda _: '0', range(len(self.vs))))
-        return {k: n}, k, dk
+        n_id = str(v)
+        d_ids = tuple(map(lambda _: '0', range(len(self.vs))))
+        return {n_id: n}, n_id, d_ids
 
     def ident(self, ast):
-        k = ast
-        n = 'V', k
-        dk = tuple(map(lambda vn: '1' if vn == k else '0', self.vs.keys()))
-        return {k: n}, k, dk
+        n_id = ast
+        n = 'V', n_id
+        d_ids = tuple(map(lambda vn: '1' if vn == n_id else '0', self.vs.keys()))
+        return {n_id: n}, n_id, d_ids
 

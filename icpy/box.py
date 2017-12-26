@@ -4,7 +4,7 @@ import sys
 from copy import copy, deepcopy
 from interval import interval
 from functools import reduce
-from .interval_utils import is_empty
+from .interval_utils import is_empty, width
 
 class Box:
     """The interface for box implementations.
@@ -17,6 +17,9 @@ class Box:
         pass
 
     def __len__(self):
+        pass
+
+    def width(self):
         pass
 
     def is_empty(self):
@@ -43,6 +46,14 @@ class IntervalDict(Box):
 
     def __len__(self):
         return len(self.__value)
+
+    def width(self):
+        w = 0
+        for i in self.__value.values():
+            w_ = width(i)
+            if w_ > w:
+                w = w_
+        return w
 
     def __str__(self):
         return "box"+str(self.__value)
@@ -88,6 +99,14 @@ class IntervalList(Box):
 
     def __len__(self):
         return len(self.__value)
+
+    def width(self):
+        w = 0
+        for i in self.__value:
+            w_ = width(i)
+            if w_ > w:
+                w = w_
+        return w
 
     def __str__(self):
         ss = map(lambda vn: "'"+vn+"': "+str(self[vn]), self.__scope)

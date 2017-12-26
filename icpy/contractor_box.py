@@ -113,7 +113,7 @@ class BC3(Contractor):
 
         lb = box[vn][0].inf
 
-        # shrink upper bound
+        # shrink the upper bound
         if not self.__is_consistent_u(box):
             self.__shrink_upper(box)
 
