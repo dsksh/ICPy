@@ -20,4 +20,6 @@ setup(name='icpy',
       entry_points = {
           'console_scripts': ['icpy=icpy.__init__:main'],
       },
-      zip_safe=False)
+      zip_safe=False,
+      test_suite='nose.collector',
+      tests_require=['nose'])

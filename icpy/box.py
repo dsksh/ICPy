@@ -59,6 +59,8 @@ class IntervalDict(Box):
         return "box"+str(self.__value)
 
     def is_empty(self):
+        if len(self) == 0:
+            return True
         for i in self.__value.values():
             if is_empty(i):
                 return True
@@ -113,6 +115,8 @@ class IntervalList(Box):
         return 'box{'+reduce(lambda s1, s2: s1+', '+s2, ss)+'}'
 
     def is_empty(self):
+        if len(self) == 0:
+            return True
         for i in self.__value:
             if is_empty(i):
                 return True
