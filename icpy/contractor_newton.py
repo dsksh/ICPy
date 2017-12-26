@@ -60,32 +60,44 @@ class Function():
         return self.__eval(self.__d_ids[v_id], box)
 
 
+def sample_mp(x):
+    return x.midpoint
+
+def sample_inf(x):
+    return max([x[0].inf, -inf])
+
+def sample_sup(x):
+    return min([x[0].sup, inf])
+
+
 class NewtonUni(Contractor):
 
-    def __init__(self, dag, n_id, d_ids, v_name, v_id):
-        self.__fun = Function(dag, n_id, d_ids)
+    def __init__(self, dag, n_id, d_ids, v_name, v_id, sample_fun=sample_mp):
+        super().__init__(dag)
+        self.fun = Function(dag, n_id, d_ids)
         self.__v_name = v_name
         self.__v_id = v_id
+        self.sample_fun = sample_fun
 
 
-    def process(self, box):
+    def __step(self, box):
 
         dom = box[self.__v_name]
 
-        f = self.__fun.eval(box)
+        f = self.fun.eval(box)
         #print('f: '+str(f))
         if is_empty(f) or not is_superset(f, 0):
             return interval()
 
-        df = self.__fun.d_eval(self.__v_id, box)
+        df = self.fun.d_eval(self.__v_id, box)
         #print('df: '+str(df))
         if is_empty(df):
             return interval()
 
-        c = box[self.__v_name].midpoint
+        c = self.sample_fun(box[self.__v_name])
         # TODO
         box[self.__v_name] = interval[c]
-        fc = self.__fun.eval(box)
+        fc = self.fun.eval(box)
         #print('fc: '+str(fc))
         box[self.__v_name] = dom
         
@@ -108,7 +120,7 @@ class NewtonUni(Contractor):
 
         while True:
             old = box[vn]
-            box[vn] = self.process(box)
+            box[vn] = self.__step(box)
             if box[vn] == old or box.is_empty():
                 break
 

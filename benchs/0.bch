@@ -4,6 +4,6 @@ Variables
 
 Constraints
 x + 5 * ( 10 - y ) == 0;
-x >= y;
+x <= y;
 
 end

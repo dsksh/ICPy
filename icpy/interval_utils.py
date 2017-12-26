@@ -8,6 +8,11 @@ from interval import interval, inf, imath
 def is_empty(x):
     return len(x) == 0
 
+def width(x):
+    if is_empty(x):
+        return 0
+    else:
+        return x[0].sup - x[0].inf
 
 def is_superset(x, v):
     return x[0].inf <= v and v <= x[0].sup
@@ -64,4 +69,28 @@ def root(x, n):
         return pow(x, interval[1]/n)
     else:
         return pow(x, interval[1]/n) | (-pow(-x, interval[1]/n))
+
+
+def slice_lower(x, eps=1e-8):
+    if is_empty(x) or width(x) <= eps:
+        return x
+
+    b = max([-sys.float_info.max, x[0].inf]) + eps
+
+    if not is_superset(x, b):
+        return x
+    else:
+        return interval[x[0].inf, b]
+
+def slice_upper(x, eps=1e-8):
+    if is_empty(x) or width(x) <= eps:
+        return x
+
+    b = min([sys.float_info.max, x[0].sup]) - eps
+
+    if not is_superset(x, b):
+        return x
+    else:
+        return interval[b, x[0].sup]
+
 

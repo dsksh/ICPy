@@ -88,3 +88,16 @@ def append_diff_node(dag, op, v1, d1, v2, d2):
         print("unsupported op: "+op)
         assert(False)
 
+
+def cons_fun(dag, op, nl, nr):
+    #if op == '==':
+    #elif op == '>' or op == '>=':
+    #elif op == '<' or op == '<=':
+
+    n_id = append_node(dag, '-', nl[0], nr[0])
+    d_ids = tuple(map(
+        lambda i: append_diff_node(dag, '-', 
+            nl[0], nl[1][i], nr[0], nr[1][i] ), 
+        range(len(nl[1])) ))
+    return n_id, d_ids
+

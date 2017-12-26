@@ -6,22 +6,10 @@ from copy import deepcopy
 from interval import interval, inf, imath
 from .csp_parser import CspParser
 from .csp_semantics import CspSemantics
-from .contractor import Hc4revise
+from .contractor_hull import HC4
 from .contractor_newton import NewtonUni
-from .dag import merge, append_node, append_diff_node
-
-
-def cons_fun(dag, op, nl, nr):
-    #if op == '==':
-    #elif op == '>' or op == '>=':
-    #elif op == '<' or op == '<=':
-
-    n_id = append_node(dag, '-', nl[0], nr[0])
-    d_ids = tuple(map(
-        lambda i: append_diff_node(dag, '-', 
-            nl[0], nl[1][i], nr[0], nr[1][i] ), 
-        range(len(nl[1])) ))
-    return n_id, d_ids
+from .contractor_box import BC3
+from .dag import *
 
 
 def parse_and_solve(csp):
@@ -31,17 +19,24 @@ def parse_and_solve(csp):
     # prepare an initial box
     box = deepcopy(box0)
 
-    c1 = Hc4revise(dag, cs)
-    c1.contract(box)
+    for c in cs:
+        for i in range(len(vs)):
+            bc = BC3(dag, c, vs[i], i)
+            bc.contract(box)
 
-    print('after Hc4revise:')
+    print('after BC3:')
     print(box)
     print()
 
-    op,l,r = cs[0]
-    n,ds = cons_fun(dag, op, l, r)
-    c2 = NewtonUni(dag, n, ds, vs[0], 0)
-    c2.contract(box)
+    for c in cs:
+        hc = HC4(dag, c)
+        hc.contract(box)
+
+    print('after HC4:')
+    print(box)
+    print()
+
+    hc.contract(box)
 
     return box
 
