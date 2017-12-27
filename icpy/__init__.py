@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+#from __future__ import print_function
 import sys
+import argparse
 from copy import deepcopy
 from interval import interval
 from .csp_parser import CspParser
@@ -11,7 +12,7 @@ from .contractor_box import BC3
 from .solver import Solver
 
 
-def parse_and_solve(csp):
+def parse_and_solve(eps, csp):
     parser = CspParser(semantics = CspSemantics())
     vs, box0, (dag, cs) = parser.parse(csp)
 
@@ -19,43 +20,56 @@ def parse_and_solve(csp):
     box = deepcopy(box0)
 
 
-    # demonstration of the contractors
-    for c in cs:
-        for i in range(len(vs)):
-            bc = BC3(dag, c, vs[i], i)
-            bc.contract(box)
+#    # demonstration of the contractors
+#    for c in cs:
+#        for i in range(len(vs)):
+#            bc = BC3(dag, c, vs[i], i)
+#            bc.contract(box)
+#
+#    print('after BC3:')
+#    print(box)
+#    print()
+#
+#    for c in cs:
+#        hc = HC4(dag, c)
+#        hc.contract(box)
+#
+#    print('after HC4:')
+#    print(box)
+#    print()
+#
+#    # one more contraction
+#    hc.contract(box)
+#
+#    return box
 
-    print('after BC3:')
-    print(box)
-    print()
 
-    for c in cs:
-        hc = HC4(dag, c)
-        hc.contract(box)
+    # branch and prune solving
+    solver = Solver(vs, dag, cs, eps)
+    ss = solver.solve(box)
 
-    print('after HC4:')
-    print(box)
-    print()
-
-    # one more contraction
-    hc.contract(box)
-
-    return box
-
-
-    ## branch and prune solving
-    #solver = Solver(vs, dag, cs, 0.1)
-    #ss = solver.solve(box)
-
-    #return ss
+    return ss
 
 
 def main():
-    csp = open(sys.argv[1]).read()
+    parser = argparse.ArgumentParser(description='Solve a numerical CSP.')
+    parser.add_argument('csp_fn', metavar='example.bch', type=str,
+            help='a filename of a CSP description')
+    parser.add_argument('-e', '--eps', metavar='<e>', type=float, default=0.1,
+            help='a precition of the solving process')
+    args = parser.parse_args()
+    
+    csp = open(args.csp_fn).read()
+
+    print('[input model]')
     print(csp.strip())
     print()
 
-    result = parse_and_solve(csp)
-    print('result:')
-    print(result)
+    result = parse_and_solve(args.eps, csp)
+    print('[result]')
+    #print(result)
+    for i in range(len(result)):
+        print('solution %d:' % i)
+        print(result[i])
+        print()
 

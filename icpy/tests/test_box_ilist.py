@@ -48,6 +48,16 @@ def test_instance2():
     assert x['b'] == interval[0,1]
 
 
+def test_instance3():
+    x = IntervalList({'a': 0, 'b': 1}, [interval[0,1], interval[0,1]])
+    assert len(x) == 2
+    assert x.width() == 1
+    assert str(x) == "box{'a': interval([0.0, 1.0]), 'b': interval([0.0, 1.0])}"
+    assert not x.is_empty()
+    assert x['a'] == interval[0,1]
+    assert x['b'] == interval[0,1]
+
+
 def test_empty():
     x = IntervalList({})
     assert len(x) == 0
