@@ -69,12 +69,12 @@ class IntervalDict(Box):
 
 class IntervalList(Box):
 
-    def __init__(self, vd, box=None):
-        if box is None:
+    def __init__(self, vd, ilist=None):
+        if ilist is None:
             self.__init_from_dict(vd)
         else:
             self.__scope = vd
-            self.__value = box
+            self.__value = ilist
 
     def __init_from_dict(self, vd):
         # create a map from a vn to an index
@@ -97,7 +97,11 @@ class IntervalList(Box):
         return self.__value[self.__scope[vn]]
 
     def __setitem__(self, vn, value):
-        self.__value[self.__scope[vn]] = value
+        if vn not in self.__scope:
+            self.__scope[vn] = len(self.__scope)
+            self.__value.append(value)
+        else:
+            self.__value[self.__scope[vn]] = value
 
     def __len__(self):
         return len(self.__value)
@@ -111,8 +115,11 @@ class IntervalList(Box):
         return w
 
     def __str__(self):
-        ss = map(lambda vn: "'"+vn+"': "+str(self[vn]), self.__scope)
-        return 'box{'+reduce(lambda s1, s2: s1+', '+s2, ss)+'}'
+        ss = list(map(lambda vn: "'"+vn+"': "+str(self[vn]), self.__scope))
+        s = ''
+        if len(ss) >= 1:
+            s = reduce(lambda s1, s2: s1+', '+s2, ss[1:], ss[0])
+        return 'box{'+s+'}'
 
     def is_empty(self):
         if len(self) == 0:
