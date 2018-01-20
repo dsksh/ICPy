@@ -2,13 +2,31 @@
 
 
 start
-    = 'Variables' vs:variables 'Constraints' cs:constraints 'end' $
+    = 'Constants' cs:constants 'Variables' vs:variables 'Constraints' constrs:constraints 'end' $
+    | 'Variables' vs:variables 'Constraints' constrs:constraints 'end' $
+    ;
+
+constants
+    = id:ident '=' v:signed_number ';' constants
+    | id:ident '=' v:interval ';' constants
+    | id:ident '=' minus:'-' v:interval ';' constants
+    | ()
     ;
 
 
 variables
-    = id:ident 'in' '[' inf:signed_number ',' sup:signed_number ']' ';' rest:variables
+    = id:ident 'in' dom:interval ';' variables
     | ()
+    ;
+
+
+ident
+    = /[a-zA-Z][a-zA-Z0-9]*/
+    ;
+
+
+interval
+    = '[' inf:signed_number ',' sup:signed_number ']'
     ;
 
 signed_number
@@ -69,24 +87,34 @@ pow_expr
 
 pow_expr_rest
     = 
-#      op:'^' ~ arg:factor rest:pow_expr_rest
-      op:'^' ~ arg:integer rest:pow_expr_rest
+      op:'^' ~ arg:factor rest:pow_expr_rest
+#      op:'^' ~ arg:integer rest:pow_expr_rest
     | ()
     ;
 
 
 factor
     = subexpression
-    | float
-    | integer
-    | infinity
-    | interval
-    | ident
+    | ident_ref
+    | const
     ;
 
 
 subexpression
     = '(' ~ @:expression ')'
+    ;
+
+
+ident_ref
+    = ident
+    ;
+
+
+const
+    = float
+    | integer
+    | infinity
+    | interval
     ;
 
 
@@ -100,12 +128,4 @@ float
 
 infinity
     = 'inf'
-    ;
-
-interval
-    = '[' inf:expression ',' sup:expression ']'
-    ;
-
-ident
-    = /[a-zA-Z][a-zA-Z0-9]*/
     ;

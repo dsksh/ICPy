@@ -78,16 +78,68 @@ class CspParser(Parser):
 
     @graken()
     def _start_(self):
-        self._token('Variables')
-        self._variables_()
-        self.name_last_node('vs')
-        self._token('Constraints')
-        self._constraints_()
-        self.name_last_node('cs')
-        self._token('end')
-        self._check_eof()
+        with self._choice():
+            with self._option():
+                self._token('Constants')
+                self._constants_()
+                self.name_last_node('cs')
+                self._token('Variables')
+                self._variables_()
+                self.name_last_node('vs')
+                self._token('Constraints')
+                self._constraints_()
+                self.name_last_node('constrs')
+                self._token('end')
+                self._check_eof()
+            with self._option():
+                self._token('Variables')
+                self._variables_()
+                self.name_last_node('vs')
+                self._token('Constraints')
+                self._constraints_()
+                self.name_last_node('constrs')
+                self._token('end')
+                self._check_eof()
+            self._error('no available options')
         self.ast._define(
-            ['cs', 'vs'],
+            ['constrs', 'cs', 'vs'],
+            []
+        )
+
+    @graken()
+    def _constants_(self):
+        with self._choice():
+            with self._option():
+                self._ident_()
+                self.name_last_node('id')
+                self._token('=')
+                self._signed_number_()
+                self.name_last_node('v')
+                self._token(';')
+                self._constants_()
+            with self._option():
+                self._ident_()
+                self.name_last_node('id')
+                self._token('=')
+                self._interval_()
+                self.name_last_node('v')
+                self._token(';')
+                self._constants_()
+            with self._option():
+                self._ident_()
+                self.name_last_node('id')
+                self._token('=')
+                self._token('-')
+                self.name_last_node('minus')
+                self._interval_()
+                self.name_last_node('v')
+                self._token(';')
+                self._constants_()
+            with self._option():
+                self._void()
+            self._error('no available options')
+        self.ast._define(
+            ['id', 'minus', 'v'],
             []
         )
 
@@ -98,21 +150,33 @@ class CspParser(Parser):
                 self._ident_()
                 self.name_last_node('id')
                 self._token('in')
-                self._token('[')
-                self._signed_number_()
-                self.name_last_node('inf')
-                self._token(',')
-                self._signed_number_()
-                self.name_last_node('sup')
-                self._token(']')
+                self._interval_()
+                self.name_last_node('dom')
                 self._token(';')
                 self._variables_()
-                self.name_last_node('rest')
             with self._option():
                 self._void()
             self._error('no available options')
         self.ast._define(
-            ['id', 'inf', 'rest', 'sup'],
+            ['dom', 'id'],
+            []
+        )
+
+    @graken()
+    def _ident_(self):
+        self._pattern(r'[a-zA-Z][a-zA-Z0-9]*')
+
+    @graken()
+    def _interval_(self):
+        self._token('[')
+        self._signed_number_()
+        self.name_last_node('inf')
+        self._token(',')
+        self._signed_number_()
+        self.name_last_node('sup')
+        self._token(']')
+        self.ast._define(
+            ['inf', 'sup'],
             []
         )
 
@@ -322,7 +386,7 @@ class CspParser(Parser):
                 self._token('^')
                 self.name_last_node('op')
                 self._cut()
-                self._integer_()
+                self._factor_()
                 self.name_last_node('arg')
                 self._pow_expr_rest_()
                 self.name_last_node('rest')
@@ -340,15 +404,9 @@ class CspParser(Parser):
             with self._option():
                 self._subexpression_()
             with self._option():
-                self._float_()
+                self._ident_ref_()
             with self._option():
-                self._integer_()
-            with self._option():
-                self._infinity_()
-            with self._option():
-                self._interval_()
-            with self._option():
-                self._ident_()
+                self._const_()
             self._error('no available options')
 
     @graken()
@@ -358,6 +416,23 @@ class CspParser(Parser):
         self._expression_()
         self.name_last_node('@')
         self._token(')')
+
+    @graken()
+    def _ident_ref_(self):
+        self._ident_()
+
+    @graken()
+    def _const_(self):
+        with self._choice():
+            with self._option():
+                self._float_()
+            with self._option():
+                self._integer_()
+            with self._option():
+                self._infinity_()
+            with self._option():
+                self._interval_()
+            self._error('no available options')
 
     @graken()
     def _integer_(self):
@@ -371,30 +446,21 @@ class CspParser(Parser):
     def _infinity_(self):
         self._token('inf')
 
-    @graken()
-    def _interval_(self):
-        self._token('[')
-        self._expression_()
-        self.name_last_node('inf')
-        self._token(',')
-        self._expression_()
-        self.name_last_node('sup')
-        self._token(']')
-        self.ast._define(
-            ['inf', 'sup'],
-            []
-        )
-
-    @graken()
-    def _ident_(self):
-        self._pattern(r'[a-zA-Z][a-zA-Z0-9]*')
-
 
 class CspSemantics(object):
     def start(self, ast):
         return ast
 
+    def constants(self, ast):
+        return ast
+
     def variables(self, ast):
+        return ast
+
+    def ident(self, ast):
+        return ast
+
+    def interval(self, ast):
         return ast
 
     def signed_number(self, ast):
@@ -433,6 +499,12 @@ class CspSemantics(object):
     def subexpression(self, ast):
         return ast
 
+    def ident_ref(self, ast):
+        return ast
+
+    def const(self, ast):
+        return ast
+
     def integer(self, ast):
         return ast
 
@@ -440,12 +512,6 @@ class CspSemantics(object):
         return ast
 
     def infinity(self, ast):
-        return ast
-
-    def interval(self, ast):
-        return ast
-
-    def ident(self, ast):
         return ast
 
 

@@ -37,18 +37,28 @@ def calc_rest(value, ast):
 class CspSemantics(object):
 
     def __init__(self):
+        self.cs = {}
         self.vs = {}
 
     def start(self, ast):
-        return list(self.vs.keys()), Box(self.vs), ast.cs
+        return list(self.vs.keys()), Box(self.vs), ast.constrs
+
+    def constants(self, ast):
+        if not ast.id is None:
+            if ast.minus is None:
+                self.cs[ast.id] = ast.v
+            else:
+                self.cs[ast.id] = -interval[ast.inf, ast.sup]
 
     def variables(self, ast):
         if not ast.id is None:
-            self.vs[ast.id[1]] = interval[ast.inf, ast.sup]
-            #return ast.rest
+            self.vs[ast.id] = ast.dom
+
+    def interval(self, ast):
+        return interval[ast.inf, ast.sup]
 
     def signed_number(self, ast):
-        v = ast.value[0][ast.value[1]][1]
+        v = ast.value
         if ast.minus is None:
             return v
         else:
@@ -92,39 +102,42 @@ class CspSemantics(object):
             return dag, n_id_, d_ids_
 
     def pow_expr(self, ast):
+        # check the type of the exponent
+        if not ast.rest.op is None:
+            arg = ast.rest.arg
+            dag = arg[0]
+            assert(type(dag[arg[1]][1]) is int)
+
         return calc_rest(ast.base, ast.rest)
 
 
-    def integer(self, ast):
-        v = int(ast)
+    def ident_ref(self, ast):
+        n_id = ast
+        if n_id in self.cs.keys():
+            v = self.cs[n_id]
+            n = 'C', v
+            n_id = str(v)
+            d_ids = tuple(map(lambda _: '0', self.vs))
+            return {n_id: n}, n_id, d_ids
+        else:
+            n = 'V', n_id
+            d_ids = tuple(map(lambda vn: '1' if vn == n_id else '0', self.vs.keys()))
+            return {n_id: n}, n_id, d_ids
+
+
+    def const(self, ast):
+        v = ast
         n = 'C', v
         n_id = str(v)
         d_ids = tuple(map(lambda _: '0', self.vs))
         return {n_id: n}, n_id, d_ids
+
+    def integer(self, ast):
+        return int(ast)
 
     def float(self, ast):
-        v = float(ast)
-        n = 'C', v
-        n_id = str(v)
-        d_ids = tuple(map(lambda _: '0', self.vs))
-        return {n_id: n}, n_id, d_ids
+        return float(ast)
 
     def infinity(self, ast):
-        v = float('inf')
-        n = 'C', v
-        n_id = str(v)
-        d_ids = tuple(map(lambda _: '0', self.vs))
-        return {n_id: n}, n_id, d_ids
-
-    def interval(self, ast):
-        n = 'I', ast.inf, ast.sup
-        n_id = str(v)
-        d_ids = tuple(map(lambda _: '0', range(len(self.vs))))
-        return {n_id: n}, n_id, d_ids
-
-    def ident(self, ast):
-        n_id = ast
-        n = 'V', n_id
-        d_ids = tuple(map(lambda vn: '1' if vn == n_id else '0', self.vs.keys()))
-        return {n_id: n}, n_id, d_ids
+        return float('inf')
 
