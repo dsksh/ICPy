@@ -50,9 +50,23 @@ class CspSemantics(object):
             else:
                 self.cs[ast.id] = -interval[ast.inf, ast.sup]
 
+
     def variables(self, ast):
         if not ast.id is None:
-            self.vs[ast.id] = ast.dom
+            if ast.ind < 0:
+                self.vs[ast.id] = ast.dom
+            else:
+                assert(ast.ind >= 2)
+                for i in range(ast.ind):
+                    self.vs[ast.id+'['+str(i)+']'] = ast.dom
+
+
+    def var_index(self, ast):
+        if not ast.n is None:
+            return ast.n
+        else: 
+            return -1
+
 
     def interval(self, ast):
         return interval[ast.inf, ast.sup]
@@ -112,14 +126,17 @@ class CspSemantics(object):
 
 
     def ident_ref(self, ast):
-        n_id = ast
+        n_id = ast.id
         if n_id in self.cs.keys():
+            assert(ast.ind < 0)
             v = self.cs[n_id]
             n = 'C', v
             n_id = str(v)
             d_ids = tuple(map(lambda _: '0', self.vs))
             return {n_id: n}, n_id, d_ids
         else:
+            if ast.ind >= 0:
+                n_id = n_id+'['+str(ast.ind)+']'
             n = 'V', n_id
             d_ids = tuple(map(lambda vn: '1' if vn == n_id else '0', self.vs.keys()))
             return {n_id: n}, n_id, d_ids

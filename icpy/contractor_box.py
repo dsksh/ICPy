@@ -23,7 +23,7 @@ class BC3(Contractor):
         self.__fun = self.__newton.fun
 
         self.__proj = interval()
-        if op == '==':
+        if op == '=':
             self.__proj = interval[0]
         elif op == '>' or op == '>=':
             self.__proj = interval[0, inf]

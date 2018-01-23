@@ -15,7 +15,13 @@ constants
 
 
 variables
-    = id:ident 'in' dom:interval ';' variables
+    = id:ident ind:var_index 'in' dom:interval ';' variables
+    | ()
+    ;
+
+
+var_index
+    = '[' n:integer ']'
     | ()
     ;
 
@@ -45,11 +51,11 @@ constraints
     ;
 
 inequality
-    = left:expression op:'==' right:expression
-    | left:expression op:'<'  right:expression
+    = left:expression op:'<'  right:expression
     | left:expression op:'<=' right:expression
     | left:expression op:'>'  right:expression
     | left:expression op:'>=' right:expression
+    | left:expression op:'='  right:expression
     ;
 
 
@@ -106,7 +112,7 @@ subexpression
 
 
 ident_ref
-    = ident
+    = id:ident ind:var_index
     ;
 
 

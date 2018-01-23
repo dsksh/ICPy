@@ -149,6 +149,8 @@ class CspParser(Parser):
             with self._option():
                 self._ident_()
                 self.name_last_node('id')
+                self._var_index_()
+                self.name_last_node('ind')
                 self._token('in')
                 self._interval_()
                 self.name_last_node('dom')
@@ -158,7 +160,23 @@ class CspParser(Parser):
                 self._void()
             self._error('no available options')
         self.ast._define(
-            ['dom', 'id'],
+            ['dom', 'id', 'ind'],
+            []
+        )
+
+    @graken()
+    def _var_index_(self):
+        with self._choice():
+            with self._option():
+                self._token('[')
+                self._integer_()
+                self.name_last_node('n')
+                self._token(']')
+            with self._option():
+                self._void()
+            self._error('no available options')
+        self.ast._define(
+            ['n'],
             []
         )
 
@@ -236,13 +254,6 @@ class CspParser(Parser):
             with self._option():
                 self._expression_()
                 self.name_last_node('left')
-                self._token('==')
-                self.name_last_node('op')
-                self._expression_()
-                self.name_last_node('right')
-            with self._option():
-                self._expression_()
-                self.name_last_node('left')
                 self._token('<')
                 self.name_last_node('op')
                 self._expression_()
@@ -265,6 +276,13 @@ class CspParser(Parser):
                 self._expression_()
                 self.name_last_node('left')
                 self._token('>=')
+                self.name_last_node('op')
+                self._expression_()
+                self.name_last_node('right')
+            with self._option():
+                self._expression_()
+                self.name_last_node('left')
+                self._token('=')
                 self.name_last_node('op')
                 self._expression_()
                 self.name_last_node('right')
@@ -420,6 +438,13 @@ class CspParser(Parser):
     @graken()
     def _ident_ref_(self):
         self._ident_()
+        self.name_last_node('id')
+        self._var_index_()
+        self.name_last_node('ind')
+        self.ast._define(
+            ['id', 'ind'],
+            []
+        )
 
     @graken()
     def _const_(self):
@@ -455,6 +480,9 @@ class CspSemantics(object):
         return ast
 
     def variables(self, ast):
+        return ast
+
+    def var_index(self, ast):
         return ast
 
     def ident(self, ast):

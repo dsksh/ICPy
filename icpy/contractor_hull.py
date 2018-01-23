@@ -122,7 +122,7 @@ class HC4(Contractor):
         fwd = self.__fwd
         bwd = self.__bwd
 
-        if op == '==':
+        if op == '=':
             v = fwd[l] & fwd[r]
             bwd[l] = v
             self.__bwd_propag(l, box)

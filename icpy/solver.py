@@ -64,17 +64,17 @@ class Solver:
                 bc = BC3(self.__dag, c, self.__vs[i], i)
                 bc.contract(box)
     
-        print('after BC3:')
-        print(box)
-        print()
+        #print('after BC3:')
+        #print(box)
+        #print()
     
         for c in self.__cs:
             hc = HC4(self.__dag, c)
             hc.contract(box)
     
-        print('after HC4:')
-        print(box)
-        print()
+        #print('after HC4:')
+        #print(box)
+        #print()
 
 
     def __split(self, v, box):

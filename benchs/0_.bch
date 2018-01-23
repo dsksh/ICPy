@@ -1,0 +1,11 @@
+Constants
+  c = 5;
+
+Variables
+  x[2] in [-1e+2,  1e+2];
+
+Constraints
+x[0] + c * ( 10 - x[1] ) = 0;
+x[0] <= x[1];
+
+end
