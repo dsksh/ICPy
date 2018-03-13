@@ -3,7 +3,7 @@
 from __future__ import print_function
 import sys
 from interval import interval, inf, imath
-from .interval_utils import root
+from .interval_utils import root, is_empty
 from .contractor import Contractor
 
 
@@ -42,6 +42,22 @@ class HC4(Contractor):
             rec(n[1], box)
             i = self.dag[n[2]][1]
             fwd[n_id] = fwd[n[1]] ** i
+    
+        elif n[0] == 'exp':
+            rec(n[1], box)
+            fwd[n_id] = imath.exp( fwd[n[1]] )
+    
+        elif n[0] == 'sqrt':
+            rec(n[1], box)
+            fwd[n_id] = imath.sqrt( fwd[n[1]] )
+    
+        elif n[0] == 'sin':
+            rec(n[1], box)
+            fwd[n_id] = imath.sin( fwd[n[1]] )
+    
+        elif n[0] == 'cos':
+            rec(n[1], box)
+            fwd[n_id] = imath.cos( fwd[n[1]] )
     
         elif n[0] == 'C':
             fwd[n_id] = interval[n[1]]
@@ -90,12 +106,29 @@ class HC4(Contractor):
                 p = root(bwd[n_id], i)
                 pp = p & fwd[n[1]]
                 np = (-p) & fwd[n[1]]
-                bwd[n[1]] = interval.hull([pp, np])
+                if is_empty(pp) or is_empty(np):
+                    bwd[n[1]] = interval()
+                else:
+                    bwd[n[1]] = interval.hull([pp, np])
             else:
                 bwd[n[1]] = root(bwd[n_id], i)
     
             rec(n[1], box)
-    
+
+        elif n[0] == 'sqrt':
+            if is_empty(bwd[n_id]) or bwd[n_id][0].sup < 0:
+                bwd[n[1]] = interval()
+            elif bwd[n_id][0].inf < 0:
+                i = interval([0, bwd[n_id][0].sup])
+                bwd[n[1]] &= i*i
+            else:
+                bwd[n[1]] &= bwd[n_id] * bwd[n_id]
+
+            assert(not is_empty(bwd[n[1]]))
+
+        # TODO
+        #elif n[0] == 'sin':
+
         elif n[0] == 'C':
             bwd[n_id] &= n[1]
         elif n[0] == 'V':
@@ -114,9 +147,10 @@ class HC4(Contractor):
         # forward propagation
         self.__fwd_eval(l, box)
         self.__fwd_eval(r, box)
-        #print('fwd:')
-        #print(self.__fwd)
-        #print()
+
+        print('fwd:')
+        print(self.__fwd)
+        print()
 
         # backward propagation
         fwd = self.__fwd
@@ -145,9 +179,7 @@ class HC4(Contractor):
             bwd[r] = fwd[r] & v
             self.__bwd_propag(r, box)
         
-        #self.__bwd_propag(c, box)
-
-        #print('bwd:')
-        #print(self.__bwd)
-        #print()
+        print('bwd:')
+        print(self.__bwd)
+        print()
 

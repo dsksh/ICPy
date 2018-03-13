@@ -42,12 +42,60 @@ class Function():
             i = self.__dag[n[2]][1]
             return v ** i
     
+        elif n[0] == 'exp':
+            v = rec(n[1], box)
+            return imath.exp(v)
+    
+        elif n[0] == 'log':
+            v = rec(n[1], box)
+            return imath.log(v)
+    
+        elif n[0] == 'sqrt':
+            v = rec(n[1], box)
+            return imath.sqrt(v)
+    
+        elif n[0] == 'sin':
+            v = rec(n[1], box)
+            return imath.sin(v)
+    
+        elif n[0] == 'cos':
+            v = rec(n[1], box)
+            return imath.cos(v)
+    
+        elif n[0] == 'tan':
+            v = rec(n[1], box)
+            return imath.tan(v)
+    
+        elif n[0] == 'asin':
+            v = rec(n[1], box)
+            return imath.asin(v)
+    
+        elif n[0] == 'acos':
+            v = rec(n[1], box)
+            return imath.acos(v)
+    
+        elif n[0] == 'atan':
+            v = rec(n[1], box)
+            return imath.atan(v)
+    
+        elif n[0] == 'sinh':
+            v = rec(n[1], box)
+            return imath.sinh(v)
+    
+        elif n[0] == 'cosh':
+            v = rec(n[1], box)
+            return imath.cosh(v)
+    
+        elif n[0] == 'tanh':
+            v = rec(n[1], box)
+            return imath.tanh(v)
+    
         elif n[0] == 'C':
             return interval[n[1]]
         elif n[0] == 'V':
             return box[n[1]]
         else:
-            print('unsupported node: '+n)
+            print('unsupported node: '+str(n))
             assert(False)
 
 

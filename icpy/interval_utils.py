@@ -54,7 +54,7 @@ def pow(x, n):
     return imath.exp(n * imath.log(x))
 
 def root(x, n):
-    if len(x) == 0: # null interval
+    if is_empty(x):
         return x
     elif x[0].inf == 0 and x[0].sup == 0:
         return interval[0]

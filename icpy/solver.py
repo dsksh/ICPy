@@ -25,14 +25,14 @@ def select_bb(eps, box, vs, context):
         context['last'] = 0
     else:
         context['last'] += 1
-
+        context['last'] %= len(vs)
+        
     if 'sp' not in context:
         context['sp'] = context['last']
     elif context['sp'] == context['last']:
         del context['sp']
         return None
 
-    context['last'] %= len(vs)
     vn = vs[context['last']]
     if width(box[vn]) <= eps:
         return select_bb(eps, box, vs, context)
@@ -67,10 +67,13 @@ class Solver:
         #print('after BC3:')
         #print(box)
         #print()
+
+        if box.is_empty():
+            return
     
-        for c in self.__cs:
-            hc = HC4(self.__dag, c)
-            hc.contract(box)
+        #for c in self.__cs:
+        #    hc = HC4(self.__dag, c)
+        #    hc.contract(box)
     
         #print('after HC4:')
         #print(box)
@@ -103,7 +106,8 @@ class Solver:
             v = self.__select_var(self.__eps, box, self.__vs, ctx)
 
             if (v is None):
-                solutions.append(box)
+                if (not box.is_empty()):
+                    solutions.append(box)
             else:
                 b1,b2 = self.__split(v, box)
                 self.__append(undecided, (b1,ctx))

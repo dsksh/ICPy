@@ -80,22 +80,52 @@ class CspParser(Parser):
     def _start_(self):
         with self._choice():
             with self._option():
-                self._token('Constants')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('Constants')
+                        with self._option():
+                            self._token('constants')
+                        self._error('expecting one of: Constants constants')
                 self._constants_()
                 self.name_last_node('cs')
-                self._token('Variables')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('Variables')
+                        with self._option():
+                            self._token('variables')
+                        self._error('expecting one of: Variables variables')
                 self._variables_()
                 self.name_last_node('vs')
-                self._token('Constraints')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('Constraints')
+                        with self._option():
+                            self._token('constraints')
+                        self._error('expecting one of: Constraints constraints')
                 self._constraints_()
                 self.name_last_node('constrs')
                 self._token('end')
                 self._check_eof()
             with self._option():
-                self._token('Variables')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('Variables')
+                        with self._option():
+                            self._token('variables')
+                        self._error('expecting one of: Variables variables')
                 self._variables_()
                 self.name_last_node('vs')
-                self._token('Constraints')
+                with self._group():
+                    with self._choice():
+                        with self._option():
+                            self._token('Constraints')
+                        with self._option():
+                            self._token('constraints')
+                        self._error('expecting one of: Constraints constraints')
                 self._constraints_()
                 self.name_last_node('constrs')
                 self._token('end')
@@ -422,6 +452,8 @@ class CspParser(Parser):
             with self._option():
                 self._subexpression_()
             with self._option():
+                self._unary_fun_()
+            with self._option():
                 self._ident_ref_()
             with self._option():
                 self._const_()
@@ -434,6 +466,36 @@ class CspParser(Parser):
         self._expression_()
         self.name_last_node('@')
         self._token(')')
+
+    @graken()
+    def _unary_fun_(self):
+        self._fun_name_()
+        self.name_last_node('name')
+        self._token('(')
+        self._expression_()
+        self.name_last_node('arg')
+        self._token(')')
+        self.ast._define(
+            ['arg', 'name'],
+            []
+        )
+
+    @graken()
+    def _fun_name_(self):
+        with self._choice():
+            with self._option():
+                self._token('sqrt')
+            with self._option():
+                self._token('exp')
+            with self._option():
+                self._token('log')
+            with self._option():
+                self._token('sin')
+            with self._option():
+                self._token('cos')
+            with self._option():
+                self._token('tan')
+            self._error('expecting one of: cos exp log sin sqrt tan')
 
     @graken()
     def _ident_ref_(self):
@@ -525,6 +587,12 @@ class CspSemantics(object):
         return ast
 
     def subexpression(self, ast):
+        return ast
+
+    def unary_fun(self, ast):
+        return ast
+
+    def fun_name(self, ast):
         return ast
 
     def ident_ref(self, ast):

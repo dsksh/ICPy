@@ -7,7 +7,7 @@ import json
 from grako.util import asjson
 from interval import interval, imath
 from .box import IntervalList, IntervalDict
-from .dag import merge, append_node, append_diff_node
+from .dag import merge, append_diff_node_bin, append_diff_node_un
 
 
 Box = IntervalList
@@ -27,7 +27,7 @@ def calc_rest(value, ast):
             dag[k] = (ast.op, value[1], ast.arg[1])
 
         dk = tuple(map(
-            lambda i: append_diff_node(dag, ast.op, 
+            lambda i: append_diff_node_bin(dag, ast.op, 
                 value[1], value[2][i], ast.arg[1], ast.arg[2][i] ), 
             range(len(value[2])) ))
 
@@ -81,7 +81,7 @@ class CspSemantics(object):
 
     def constraints(self, ast):
         if ast.head is None:
-            return {'0': ('C', 0), '1': ('C', 1)}, []
+            return {'0': ('C', 0), '1': ('C', 1), '2': ('C', 2)}, []
         else:
             dag = merge([ast.head[0], ast.rest[0]])
             #print(str(ast.head[1]))
@@ -110,7 +110,7 @@ class CspSemantics(object):
                 dag[n_id_] = '-', '0', n_id
 
             d_ids_ = tuple(map(
-                lambda i: append_diff_node(dag, '-', '0', '0', n_id, d_ids[i]), 
+                lambda i: append_diff_node_bin(dag, '-', '0', '0', n_id, d_ids[i]), 
                 range(len(d_ids)) ))
 
             return dag, n_id_, d_ids_
@@ -124,6 +124,19 @@ class CspSemantics(object):
 
         return calc_rest(ast.base, ast.rest)
 
+    def unary_fun(self, ast):
+        dag = ast.arg[0]
+
+        k = ast.name+'('+ast.arg[1]+')'
+        if k not in dag.keys():
+            dag[k] = (ast.name, ast.arg[1])
+
+        dk = tuple(map(
+            lambda i: append_diff_node_un(dag, ast.name, 
+                ast.arg[1], ast.arg[2][i] ), 
+            range(len(ast.arg[2])) ))
+
+        return dag, k, dk
 
     def ident_ref(self, ast):
         n_id = ast.id

@@ -19,6 +19,7 @@ def parse_and_solve(eps, csp):
     # prepare an initial box
     box = deepcopy(box0)
 
+    print(dag)
 
 #    # demonstration of the contractors
 #    for c in cs:

@@ -5,7 +5,7 @@ from setuptools import setup
 with open("README.md") as f:
     long_description = f.read()
 
-setup(name='icpy',
+setup(name='icpy-solver',
       version='0.0.1',
       description='An interval constraint programming tool',
       url='https://github.com/dsksh/ICPy',
