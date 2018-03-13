@@ -6,7 +6,7 @@ Variables
   y in [-10,  10];
 
 Constraints
-x + c * ( 10 - y ) = 0;
-x <= y;
+  x + c * ( 10 - y ) = 0;
+  x <= y;
 
 end

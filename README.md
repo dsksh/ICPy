@@ -11,7 +11,7 @@ Interval Constraint Programming tool implemented with Python 3.
 
 ## Usage
 
-    $ pip install icpy
+    $ pip install icpy-solver
     
     $ cat example.bch
     Variables
