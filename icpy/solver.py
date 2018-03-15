@@ -5,6 +5,7 @@ import sys
 from copy import deepcopy
 from interval import interval
 from .interval_utils import width
+from .contractor import Contractor
 from .contractor_hull import HC4
 from .contractor_newton import NewtonUni
 from .contractor_box import BC3
@@ -60,9 +61,10 @@ class Solver:
 
     def __contract(self, box):
         for c in self.__cs:
-            for i in range(len(self.__vs)):
-                bc = BC3(self.__dag, c, self.__vs[i], i)
-                bc.contract(box)
+            if c[0] != 'Switch':
+                for i in range(len(self.__vs)):
+                    bc = BC3(self.__dag, c, self.__vs[i], i)
+                    bc.contract(box)
     
         #print('after BC3:')
         #print(box)
@@ -102,6 +104,29 @@ class Solver:
             box,ctx = self.__extract(undecided)
 
             self.__contract(box)
+
+            # ask and contract
+            for c in self.__cs:
+                if c[0] == 'Switch':
+                    b_tmp = deepcopy(box)
+
+                    #print('Switch contract')
+                    #print(b_tmp)
+
+                    res = Contractor.UNKNOWN
+                    for i in range(len(self.__vs)):
+                        bc = BC3(self.__dag, c[2], self.__vs[i], i)
+                        res = bc.contract(b_tmp)
+                        if not res is Contractor.UNKNOWN:
+                            break
+                    if res is Contractor.PROVED:
+                        for i in range(len(self.__vs)):
+                            bc = BC3(self.__dag, ('=',c[1],c[3]), self.__vs[i], i)
+                            bc.contract(box)
+                    elif res is Contractor.NO_SOL:
+                        for i in range(len(self.__vs)):
+                            bc = BC3(self.__dag, ('=',c[1],c[4]), self.__vs[i], i)
+                            bc.contract(box)
 
             v = self.__select_var(self.__eps, box, self.__vs, ctx)
 

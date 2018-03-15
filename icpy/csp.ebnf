@@ -51,6 +51,7 @@ signed_number
 
 constraints
     = head:inequality ';' rest:constraints
+    | head:equation ';' rest:constraints
     | ()
     ;
 
@@ -59,9 +60,12 @@ inequality
     | left:expression op:'<=' right:expression
     | left:expression op:'>'  right:expression
     | left:expression op:'>=' right:expression
-    | left:expression op:'='  right:expression
     ;
 
+equation
+    = left:expression op:'='  right:expression
+    | op:'Switch' '[' left:expression ',' cond:inequality ',' r1:expression ',' r2:expression ']'
+    ;
 
 expression
     = head:term rest:expr_rest

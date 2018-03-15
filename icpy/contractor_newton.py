@@ -169,6 +169,7 @@ class NewtonUni(Contractor):
         while True:
             old = box[vn]
             box[vn] = self.__step(box)
-            if box[vn] == old or box.is_empty():
+            if box[vn] == old:
                 break
-
+            if box.is_empty():
+                break

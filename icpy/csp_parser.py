@@ -271,6 +271,12 @@ class CspParser(Parser):
                 self._constraints_()
                 self.name_last_node('rest')
             with self._option():
+                self._equation_()
+                self.name_last_node('head')
+                self._token(';')
+                self._constraints_()
+                self.name_last_node('rest')
+            with self._option():
                 self._void()
             self._error('no available options')
         self.ast._define(
@@ -309,6 +315,15 @@ class CspParser(Parser):
                 self.name_last_node('op')
                 self._expression_()
                 self.name_last_node('right')
+            self._error('no available options')
+        self.ast._define(
+            ['left', 'op', 'right'],
+            []
+        )
+
+    @graken()
+    def _equation_(self):
+        with self._choice():
             with self._option():
                 self._expression_()
                 self.name_last_node('left')
@@ -316,9 +331,25 @@ class CspParser(Parser):
                 self.name_last_node('op')
                 self._expression_()
                 self.name_last_node('right')
+            with self._option():
+                self._token('Switch')
+                self.name_last_node('op')
+                self._token('[')
+                self._expression_()
+                self.name_last_node('left')
+                self._token(',')
+                self._inequality_()
+                self.name_last_node('cond')
+                self._token(',')
+                self._expression_()
+                self.name_last_node('r1')
+                self._token(',')
+                self._expression_()
+                self.name_last_node('r2')
+                self._token(']')
             self._error('no available options')
         self.ast._define(
-            ['left', 'op', 'right'],
+            ['cond', 'left', 'op', 'r1', 'r2', 'right'],
             []
         )
 
@@ -560,6 +591,9 @@ class CspSemantics(object):
         return ast
 
     def inequality(self, ast):
+        return ast
+
+    def equation(self, ast):
         return ast
 
     def expression(self, ast):

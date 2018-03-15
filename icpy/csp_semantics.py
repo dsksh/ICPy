@@ -93,6 +93,27 @@ class CspSemantics(object):
         dag = merge([dl,dr])
         return dag, (ast.op, (n_id_l,d_ids_l), (n_id_r,d_ids_r))
 
+    def equation(self, ast):
+        dl,n_id_l,d_ids_l = ast.left
+        if ast.op == '=':
+            dr,n_id_r,d_ids_r = ast.right
+            dag = merge([dl,dr])
+            return dag, (ast.op, (n_id_l,d_ids_l), (n_id_r,d_ids_r))
+
+        else: #if ast.op == 'Switch':
+            dc,tc = ast.cond
+            dag = merge([dl,dc])
+
+            dr1,n_id_r1,d_ids_r1 = ast.r1
+            dag = merge([dag,dr1])
+            tr1 = (n_id_r1,d_ids_r1)
+
+            dr2,n_id_r2,d_ids_r2 = ast.r2
+            dag = merge([dag,dr2])
+            tr2 = (n_id_r2,d_ids_r2)
+
+            return dag, (ast.op, (n_id_l,d_ids_l), tc, tr1, tr2)
+
     def expression(self, ast):
         #print(json.dumps(asjson(ast.rest), indent=2))
         return calc_rest(ast.head, ast.rest)

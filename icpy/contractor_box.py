@@ -33,7 +33,15 @@ class BC3(Contractor):
 
     def __is_consistent(self, box):
         #print('f: '+str(self.__fun.eval(box)))
-        return not is_empty(self.__fun.eval(box) & self.__proj)
+        i = self.__fun.eval(box) & self.__proj
+        if is_empty(i):
+            return Contractor.NO_SOL
+        elif width(i) == 0:
+            return Contractor.PROVED
+        elif is_empty(i & interval[0]):
+            return Contractor.PROVED
+        else:
+            return Contractor.UNKNOWN
 
     def __is_consistent_l(self, box):
         # save
@@ -46,7 +54,7 @@ class BC3(Contractor):
 
         # restore
         box[self.__v_name] = dom
-        return res
+        return res != Contractor.NO_SOL
 
     def __is_consistent_u(self, box):
         dom = box[self.__v_name]
@@ -55,7 +63,7 @@ class BC3(Contractor):
         res = self.__is_consistent(box)
         #print(str(res)+' at '+str(u))
         box[self.__v_name] = dom
-        return res
+        return res != Contractor.NO_SOL
 
 
     def __shrink_lower(self, box):
@@ -98,9 +106,9 @@ class BC3(Contractor):
     def contract(self, box):
         vn = self.__v_name
 
-        if not self.__is_consistent(box):
+        if self.__is_consistent(box) == Contractor.NO_SOL:
             box[vn] = interval()
-            return 
+            return Contractor.NO_SOL
 
         # shrink the lower bound
         if not self.__is_consistent_l(box):
@@ -109,7 +117,7 @@ class BC3(Contractor):
         #print('after sl: '+str(box))
 
         if is_empty(box[vn]):
-            return
+            return Contractor.NO_SOL
 
         lb = box[vn][0].inf
 
@@ -119,3 +127,4 @@ class BC3(Contractor):
 
         #print('after su: '+str(box))
 
+        return self.__is_consistent(box)
